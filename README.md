@@ -1,5 +1,7 @@
 # OMP VS Code Bridge
 
+[English](README.md) | [简体中文](README.zh-CN.md)
+
 Shows OMP agent file edits in VS Code without stealing focus. Two TypeScript halves in one manifest:
 
 | Path | Role |
@@ -49,6 +51,10 @@ Settings: `ompBridge.requireApproval` (default on), `ompBridge.autoOpen`, `ompBr
 The `vscode_*` tools are registered whether or not a window is connected; without one they fail with "No VS Code window is connected".
 
 Uninstall: `omp plugin uninstall omp-vscode-bridge`, then remove the extension from VS Code.
+
+## Governance
+
+[Security policy](SECURITY.md) · [Code of conduct](CODE_OF_CONDUCT.md)
 
 ## Documentation
 

@@ -1,8 +1,10 @@
-<img src="images/icon.png" width="96" align="right" alt="OMP VS Code Bridge">
+<p align="center">
+  <img src="images/icon.png" alt="OMP VS Code Bridge" width="220">
+</p>
 
-# OMP VS Code Bridge
+<h1 align="center">OMP VS Code Bridge</h1>
 
-[English](README.md) | 简体中文
+<p align="center">[English](README.md) | 简体中文</p>
 
 智能体的改动直接出现在编辑器里，不抢走焦点：已跟踪文件以 diff 打开，未跟踪文件静默打开，每次写入都可审批、可回滚、也可完全不打开。智能体仍在终端里工作，VS Code 成为审阅界面。
 

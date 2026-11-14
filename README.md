@@ -1,8 +1,10 @@
-<img src="images/icon.png" width="96" align="right" alt="OMP VS Code Bridge">
+<p align="center">
+  <img src="images/icon.png" alt="OMP VS Code Bridge" width="220">
+</p>
 
-# OMP VS Code Bridge
+<h1 align="center">OMP VS Code Bridge</h1>
 
-[English](README.md) | [简体中文](README.zh-CN.md)
+<p align="center">[English](README.md) | [简体中文](README.zh-CN.md)</p>
 
 Agent edits land in your editor without stealing focus: tracked files open as diffs, untracked
 ones open quietly, and every write can be approved, reverted, or left alone. The agent keeps

@@ -6,6 +6,8 @@ node_modules/**
 src/**
 docs/**
 AGENTS.md
+SECURITY.md
+CODE_OF_CONDUCT.md
 tsconfig.json
 **/*.map
 *.vsix

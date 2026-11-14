@@ -1,0 +1,63 @@
+name: Publish to Open VSX
+
+# Trusted publishing: no Open VSX token is stored. The workflow proves its identity to
+# open-vsx.org with a GitHub OIDC ID token, which the registry exchanges for a short-lived
+# token scoped to this one extension. Register the trusted publisher first (see
+# docs/development.md); the registration must name this repository and this workflow file.
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Build and verify without publishing
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+
+      - name: Verify the tag matches the manifest
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          version="$(node -p "require('./package.json').version")"
+          if [ "${GITHUB_REF_NAME}" != "v${version}" ]; then
+            echo "::error::tag ${GITHUB_REF_NAME} does not match package.json version v${version}"
+            exit 1
+          fi
+          echo "publishing v${version}"
+
+      - name: Install
+        run: bun install --frozen-lockfile
+
+      - name: Typecheck
+        run: bun run typecheck
+
+      - name: Package
+        run: bun run package
+
+      - name: Publish
+        if: ${{ !inputs.dry_run }}
+        run: npx --yes ovsx publish ./*.vsix --trusted-publishing
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: vsix
+          path: "*.vsix"
+          if-no-files-found: error

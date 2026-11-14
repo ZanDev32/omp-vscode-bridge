@@ -13,3 +13,4 @@ tsconfig.json
 *.vsix
 dist/omp/**
 tsconfig.check.json
+.github/**

@@ -8,7 +8,7 @@
 		"type": "git",
 		"url": "https://github.com/ZanDev32/omp-vscode-bridge.git"
 	},
-	"version": "0.6.0",
+	"version": "0.6.1",
 	"private": true,
 	"license": "MIT",
 	"engines": {

@@ -1,119 +1,96 @@
+<img src="images/icon.png" width="96" align="right" alt="OMP VS Code Bridge">
+
 # OMP VS Code Bridge
 
 [English](README.md) | [简体中文](README.zh-CN.md)
 
-Shows OMP agent file edits in VS Code without stealing focus. Two TypeScript halves in one manifest:
+Agent edits land in your editor without stealing focus: tracked files open as diffs, untracked
+ones open quietly, and every write can be approved, reverted, or left alone. The agent keeps
+working in its terminal; VS Code becomes the review surface.
 
-| Path | Role |
-|---|---|
-| `src/client/` | VS Code extension — discovers endpoints, approves edits, surfaces diffs, records/reverts edits, injects editor context |
-| `src/omp/` | OMP extension — publishes one loopback endpoint per omp process, gates `edit`/`write`, snapshots pre-edit content |
-| `src/protocol.ts` | Wire format shared by both sides |
+One package, two TypeScript halves: a VS Code extension (`src/client/`) and an OMP plugin
+(`src/omp/`) that speak a loopback protocol (`src/protocol.ts`).
 
-`main` points at the compiled client, `omp.extensions` at the server source.
-
-## Install
+## Quick start
 
 ```bash
 bun install
-bun run package                                   # → omp-vscode-bridge-<version>.vsix
-code --install-extension omp-vscode-bridge-*.vsix # VS Code half
-omp plugin link .                                 # OMP half
+bun run package                                    # → omp-vscode-bridge-<version>.vsix
+code --install-extension omp-vscode-bridge-*.vsix  # editor half
+omp plugin link .                                  # agent half
 ```
 
-Reload the VS Code window and start a new omp session (new terminal or new chat panel) so the plugin loads.
-
-Verify:
+Reload the window, start a new omp session, and check the status bar:
 
 ```bash
-ls ~/.omp-vscode/servers/     # one omp-<pid>-<port>.json per running omp process
+ls ~/.omp-vscode/servers/     # one record per running omp process
 ```
 
-The status bar reads `OMP Bridge: <connected>/<detected>`; **OMP Bridge** in the activity bar lists recent edits. Logs go to the **OMP Bridge** output channel.
+`OMP Bridge: 1/1` means connected. Ask the agent to touch a file — the diff appears, focus stays
+in your terminal.
+
+Requires VS Code 1.146+ and an `omp` build with plugin support.
 
 ## What you get
 
-| Surface | Command / key | Behavior |
+| Feature | Trigger | Behavior |
 |---|---|---|
-| Per-turn context | automatic | Before each turn the server asks the window for an `ide-context` snapshot — active file, selection, diagnostics — and injects it without starting a turn. Toggle with `ompBridge.shareContext`. |
-| Approval gate | automatic | Before every `edit`/`write` the window shows Allow / **Always Allow** / Deny; for `write` the proposed content opens as a diff first. "Always Allow" remembers `tool:path` in workspace state (`ompBridge.forgetApprovals` clears it). Deny returns an error and leaves the file untouched; a 60 s timeout allows. |
-| Edit surfacing | automatic | Tracked files open as a HEAD diff, untracked ones as a silent open. `ompBridge.autoOpen` turns the opening off, leaving only history. |
-| Revert | **Revert Edit** / tree click | Restores the pre-edit text, or deletes a file the agent created. Snapshots are session-local (last 50 edits) and capped at 1 MB. |
-| Context | `Ctrl+Alt+K` selection · `Ctrl+Alt+Shift+K` file · `Ctrl+Alt+Shift+P` problems · `Ctrl+Alt+G` git diff · `Ctrl+Alt+Y` symbol | Sends `@path#LxCy-LxCy` + fenced text, diagnostics, a scoped git diff (`ompBridge.diffScope`), the enclosing LSP symbol, open tabs, or a multi-file pick into the session. `ompBridge.contextDelivery` chooses `aside` (join the running turn) or `queue` (store for the next turn). |
-| Session binding | automatic, overridable | Terminals are matched by pid ancestry; **Pin Window to Session** binds this window to one endpoint explicitly when several terminals share a workspace. |
-| VS Code tools in omp | `vscode_tools`, `vscode_tool` | Lists and invokes everything in `vscode.lm.tools` — Copilot tools and MCP servers VS Code manages — through `lm.invokeTool`. |
-| Editor diagnostics | `vscode_diagnostics` | Prints errors/warnings per file or workspace. |
-| Commands | `vscode_command` | Runs an allowlisted command id (`ompBridge.allowedCommands`, default empty) after a modal confirm. |
-| Debug / tasks | `vscode_debug`, `vscode_task` | Starts a `launch.json` configuration, stops the active session, lists or runs tasks. |
+| Edit surfacing | automatic | Tracked files open as a HEAD diff, untracked as a silent open. Disable opening with `ompBridge.autoOpen`. |
+| Approval gate | automatic | Every `edit`/`write` asks Allow / Always Allow / Deny; `write` shows the proposed content first. Deny feeds an error back to the model; 60 s of silence allows. |
+| Revert | **Recent edits** tree, or **Revert Edit** | Restores the pre-edit bytes, or deletes a file the agent created. Session-local, last 50 edits, 1 MB cap. |
+| Per-turn context | automatic | Before each turn the window's active file, selection, and diagnostics are injected as `ide-context`; no tool call needed. Toggle with `ompBridge.shareContext`. |
+| Context senders | `Ctrl+Alt+K` selection · `Ctrl+Alt+Shift+K` file · `Ctrl+Alt+Shift+P` problems · `Ctrl+Alt+G` diff · `Ctrl+Alt+Y` symbol | Plus **Send Open Tabs** and **Add Files**. `ompBridge.contextDelivery` picks `aside` (join the turn) or `queue` (next turn). |
+| VS Code tools | `vscode_*` tools | `vscode_tools`/`vscode_tool` reach `vscode.lm.tools` (Copilot tools, VS Code-managed MCP servers), `vscode_diagnostics`, `vscode_command` (allowlist + confirm), `vscode_debug`, `vscode_task`. |
+| Session binding | automatic, overridable | Terminals match by pid ancestry; **Pin Window to Session** binds explicitly when several terminals share a workspace. |
 
-Settings: `ompBridge.requireApproval` (default on), `ompBridge.autoOpen`, `ompBridge.showDiffs`, `ompBridge.shareContext` (default on), `ompBridge.includeDiagnostics` (default on), `ompBridge.diffScope`, `ompBridge.contextDelivery`, `ompBridge.ignoredPaths` (globs), `ompBridge.allowedCommands` (default empty), `ompBridge.confirmCommands` (default on).
+## Settings
 
-The `vscode_*` tools are registered whether or not a window is connected; without one they fail with "No VS Code window is connected".
+| Setting | Default | Effect |
+|---|---|---|
+| `ompBridge.requireApproval` | `true` | Ask before writes; off means auto-allow. |
+| `ompBridge.autoOpen` | `true` | Open/diff edits. Off only records them in the tree. |
+| `ompBridge.showDiffs` | `true` | Preview proposed `write` content before approving. |
+| `ompBridge.shareContext` | `true` | Inject the per-turn editor snapshot. |
+| `ompBridge.includeDiagnostics` | `true` | Include diagnostics in that snapshot. |
+| `ompBridge.contextDelivery` | `aside` | `aside` joins the running turn; `queue` waits for the next. |
+| `ompBridge.diffScope` | `unstaged` | `unstaged`, `staged`, or `head` for **Send Git Diff**. |
+| `ompBridge.ignoredPaths` | `**/node_modules/**`, `**/.git/**` | Globs never surfaced or recorded. |
+| `ompBridge.allowedCommands` | `[]` | Command ids the agent may run. Empty means none. |
+| `ompBridge.confirmCommands` | `true` | Modal confirm for each allowlisted command. |
 
-Uninstall: `omp plugin uninstall omp-vscode-bridge`, then remove the extension from VS Code.
+## Commands
 
-## Governance
+- **Sessions** — Show Sessions, Show Log File, Pin Window to Session, Unpin Session, Show Recent Edits
+- **Edits** — Revert Edit, Forget Saved Approvals
+- **Context** — Send Selection, Send File, Send Problems, Send Git Diff, Send Symbol at Cursor, Send Open Tabs, Add Files to Prompt
 
-[Security policy](SECURITY.md) · [Code of conduct](CODE_OF_CONDUCT.md)
-
-## Documentation
-
-[`docs/`](docs/README.md) carries the architecture, wire protocol, development loop, security
-model, and troubleshooting guide. Agent and contributor rules live in
-[`AGENTS.md`](AGENTS.md).
+All live under the **OMP Bridge** category; the five keybindings above are the fast path.
 
 ## How it works
 
-- The server listens on `127.0.0.1:0`, then writes an endpoint record atomically: pid, parent pid, port, cwd, session id, per-process token, and pid ancestry.
-- Every 2 s the client reads that directory, discards records whose pid is dead, and matches endpoints to its own window by terminal-pid ancestry — falling back to a single-terminal window whose workspace contains the endpoint cwd.
-- On connect the client sends `register` with the record's token plus its `capabilities`; the server answers `register_ack` with its `features` (both lists gate optional behavior, so an unknown peer degrades instead of failing) or drops the connection with `error: unauthorized`.
-- Before each turn (`before_agent_start`) the server calls `context.snapshot` (2 s budget) and injects the reply as a `customType: "ide-context"` message; that turn sees the editor state without an extra round trip from the model.
-- Before an `edit`/`write`, the server snapshots the file and asks connected windows for approval over `approval_request`; the first `approval_response` wins and a timeout allows. With no window connected the tool runs ungated.
-- Successful edits become `file_edited` with the pre-edit text (`previous`) or `created: true`. Virtual devices (`xd://`, `local://`) and non-files are filtered server-side.
-- The window may push `context` text, which the server injects into the session with `sendUserMessage({ deliverAs: "aside" })` and acknowledges with `context_result`.
-- The client diffs the file against `HEAD` through a `omp-bridge-head` content provider served by `git show`; without a commit it falls back to a silent open. Both keep `preserveFocus`.
-- The server heartbeats every 10 s (record rewrite + ping), removes its record on shutdown, and sweeps records left by dead processes at startup.
+- The OMP plugin publishes one atomic endpoint record per process (pid ancestry, port, cwd,
+  session id, per-process token) and serves it over `127.0.0.1`.
+- Each window scans for records, matches them to its own terminals, registers with the token,
+  and reconnects with backoff.
+- Edits, approvals, context, and editor tooling all travel as newline-delimited JSON on that
+  one socket; nothing leaves the machine and there is no telemetry.
+- The protocol version is shared by both halves, so a mismatched pair shows 0 sessions instead
+  of misbehaving.
 
-## Protocol (v4, newline-delimited JSON)
+## Documentation
 
-```text
-client -> server  {type:"register", protocol, token, clientId, windowId, terminalName?, workspaceRoots, capabilities}
-                  {type:"approval_response", protocol, requestId, allow, reason?}
-                  {type:"context", protocol, kind:"selection"|"file"|"problems", text, insertOnly?, cwd?}
-                  {type:"rpc_response", protocol, id, ok, result?|error?}
-                  {type:"pong"}
-server -> client  {type:"register_ack", protocol, sessionId, cwd, sessionFile?, serverPid, serverPort, features?}
-                  {type:"session_update", protocol, sessionId, cwd, sessionFile?}
-                  {type:"approval_request", protocol, requestId, tool, path, cwd, timestamp, proposed?}
-                  {type:"file_edited", protocol, sessionId, path, tool, cwd, timestamp, previous?, created?}
-                  {type:"context_result", protocol, ok, message?}
-                  {type:"rpc_request", protocol, id, method, params}
-                  {type:"ping", protocol}
-                  {type:"error", protocol, code, message}
-```
+[Architecture](docs/architecture.md) · [Protocol v4](docs/protocol.md) ·
+[Development](docs/development.md) · [Security model](docs/security.md) ·
+[Troubleshooting](docs/troubleshooting.md) · [Agent guide](AGENTS.md)
 
-```json
-{
-  "protocol": 4,
-  "pid": 2458862,
-  "parentPid": 2458427,
-  "port": 41693,
-  "sessionId": "01a1d9db-…",
-  "cwd": "/path/to/project",
-  "token": "<32 hex chars>",
-  "startedAt": "2026-11-14T11:41:00.000Z",
-  "updatedAt": "2026-11-14T11:41:00.000Z",
-  "ancestorPids": [2458427, 1168781, 1166152]
-}
-```
+Governance: [security policy](SECURITY.md) · [code of conduct](CODE_OF_CONDUCT.md).
 
 ## Development
 
 ```bash
-bun install
-bun run typecheck      # tsc --noEmit over src
-bun run build          # tsc → dist/ (CommonJS, sourcemaps)
-bun run package        # build + vsce package
+bun run typecheck   # tsc --noEmit over src/ (both halves)
+bun run build       # tsc → dist/ (client + protocol)
+bun run package     # build + vsce package
 ```
 
-`.vscodeignore` ships only `dist/`, the manifest, the icon, and docs.
+`.vscodeignore` ships only `dist/`, the manifest, the icon, and both READMEs.

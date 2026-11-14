@@ -1,9 +1,8 @@
 name: Publish to Open VSX
 
-# Trusted publishing: no Open VSX token is stored. The workflow proves its identity to
-# open-vsx.org with a GitHub OIDC ID token, which the registry exchanges for a short-lived
-# token scoped to this one extension. Register the trusted publisher first (see
-# docs/development.md); the registration must name this repository and this workflow file.
+# Authenticates with a personal access token stored as the repository secret OVSX_PAT.
+# Create one at https://open-vsx.org/user-settings/tokens (scope: publish to `zandev32`).
+# Trusted publishing (OIDC, no secret) is a later migration — see docs/development.md.
 
 on:
   push:
@@ -17,7 +16,6 @@ on:
 
 permissions:
   contents: read
-  id-token: write
 
 jobs:
   publish:
@@ -52,9 +50,22 @@ jobs:
       - name: Package
         run: bun run package
 
+      - name: Verify the token can publish
+        if: ${{ !inputs.dry_run }}
+        env:
+          OVSX_PAT: ${{ secrets.OVSX_PAT }}
+        run: |
+          if [ -z "${OVSX_PAT}" ]; then
+            echo "::error::OVSX_PAT is not set. Add a repository secret holding an Open VSX access token."
+            exit 1
+          fi
+          npx --yes ovsx verify-pat zandev32 -p "${OVSX_PAT}"
+
       - name: Publish
         if: ${{ !inputs.dry_run }}
-        run: npx --yes ovsx publish ./*.vsix --trusted-publishing
+        env:
+          OVSX_PAT: ${{ secrets.OVSX_PAT }}
+        run: npx --yes ovsx publish ./*.vsix -p "${OVSX_PAT}"
 
       - uses: actions/upload-artifact@v4
         with:

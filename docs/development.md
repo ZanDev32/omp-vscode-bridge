@@ -66,18 +66,25 @@ bytes, `xd://` writes ignored, per-turn snapshot injected, command allowlist ref
 
 ## Releasing to Open VSX
 
-Publishing uses **trusted publishing** — no token is stored in the repository. The workflow
-`.github/workflows/publish-openvsx.yml` requests a GitHub OIDC ID token and `ovsx` exchanges it
-for a short-lived credential scoped to this one extension.
+Publishing authenticates with a **personal access token** kept as the repository secret
+`OVSX_PAT`. The workflow verifies the token with `ovsx verify-pat` before uploading, so a bad
+or expired token fails with a clear message instead of a partial publish.
 
-One-time setup, on <https://open-vsx.org>:
+One-time setup:
 
-1. Sign in with GitHub and claim the `zandev32` namespace (it must match the manifest
-   `publisher`).
-2. Open **Publishers → zandev32 → Trusted Publishers** and register:
-   repository `ZanDev32/omp-vscode-bridge`, workflow `publish-openvsx.yml`, no environment.
-   If you do pin an environment, add `environment: <name>` to the job to match.
-3. Nothing else — no PAT, no repository secret.
+1. Sign in at <https://open-vsx.org> with GitHub and claim the `zandev32` namespace — it must
+   match the manifest `publisher`.
+2. Create a token at <https://open-vsx.org/user-settings/tokens>.
+3. Add it as an Actions secret named `OVSX_PAT` (Settings → Secrets and variables → Actions).
+   Repository or environment scope both work; an environment secret requires adding
+   `environment: <name>` to the job.
+
+Local publish, if you ever need it:
+
+```bash
+npx ovsx verify-pat zandev32 -p "$OVSX_PAT"
+npx ovsx publish ./*.vsix -p "$OVSX_PAT"
+```
 
 Release:
 
@@ -92,6 +99,10 @@ a `dry_run` input that builds and checks without publishing.
 
 CI (`.github/workflows/ci.yml`) runs typecheck, build, and package on every push to `master`
 and on pull requests, and uploads the vsix as an artifact.
+
+**Migration path:** Open VSX supports trusted publishing (GitHub OIDC, no stored secret). When
+you switch, register the repository and workflow on the publisher page and replace the two
+publish steps with `npx ovsx publish --trusted-publishing`, then delete `OVSX_PAT`.
 
 ## Release checklist
 

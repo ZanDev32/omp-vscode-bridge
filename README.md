@@ -50,6 +50,12 @@ The `vscode_*` tools are registered whether or not a window is connected; withou
 
 Uninstall: `omp plugin uninstall omp-vscode-bridge`, then remove the extension from VS Code.
 
+## Documentation
+
+[`docs/`](docs/README.md) carries the architecture, wire protocol, development loop, security
+model, and troubleshooting guide. Agent and contributor rules live in
+[`AGENTS.md`](AGENTS.md).
+
 ## How it works
 
 - The server listens on `127.0.0.1:0`, then writes an endpoint record atomically: pid, parent pid, port, cwd, session id, per-process token, and pid ancestry.

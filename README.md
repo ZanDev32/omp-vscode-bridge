@@ -4,7 +4,7 @@
 
 <h1 align="center">OMP VS Code Bridge</h1>
 
-<p align="center">[English](README.md) | [简体中文](README.zh-CN.md)</p>
+[English](README.md) | [简体中文](README.zh-CN.md)
 
 <p align="center">
   <a href="https://open-vsx.org/extension/zandev32/omp-vscode-bridge"><img alt="Open VSX" src="https://img.shields.io/open-vsx/v/zandev32/omp-vscode-bridge?label=Open%20VSX"></a>
@@ -104,4 +104,4 @@ bun run build       # tsc → dist/ (client + protocol)
 bun run package     # build + vsce package
 ```
 
-`.vscodeignore` ships only `dist/`, the manifest, the icon, and both READMEs.
+`.vscodeignore` ships only `dist/`, the manifest, the icon, the license, and both READMEs.

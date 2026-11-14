@@ -4,7 +4,7 @@
 
 <h1 align="center">OMP VS Code Bridge</h1>
 
-<p align="center">[English](README.md) | 简体中文</p>
+[English](README.md) | 简体中文
 
 <p align="center">
   <a href="https://open-vsx.org/extension/zandev32/omp-vscode-bridge"><img alt="Open VSX" src="https://img.shields.io/open-vsx/v/zandev32/omp-vscode-bridge?label=Open%20VSX"></a>
@@ -95,4 +95,4 @@ bun run build       # tsc → dist/（客户端 + 协议）
 bun run package     # build + vsce package
 ```
 
-`.vscodeignore` 仅打包 `dist/`、清单、图标与两份 README。
+`.vscodeignore` 仅打包 `dist/`、清单、图标、许可证与两份 README。

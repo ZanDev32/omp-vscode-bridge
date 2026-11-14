@@ -1,0 +1,11 @@
+.git/**
+.gitignore
+.vscodeignore
+bun.lock
+node_modules/**
+src/**
+tsconfig.json
+**/*.map
+*.vsix
+dist/omp/**
+tsconfig.check.json

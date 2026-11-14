@@ -1,0 +1,24 @@
+{
+	"compilerOptions": {
+		"target": "ES2022",
+		"module": "node16",
+		"moduleResolution": "node16",
+		"lib": [
+			"ES2024"
+		],
+		"outDir": "dist",
+		"rootDir": "src",
+		"strict": true,
+		"noUncheckedIndexedAccess": true,
+		"sourceMap": true,
+		"skipLibCheck": true,
+		"types": [
+			"node",
+			"vscode"
+		]
+	},
+	"include": [
+		"src/client",
+		"src/protocol.ts"
+	]
+}

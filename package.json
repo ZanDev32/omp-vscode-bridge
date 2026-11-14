@@ -1,0 +1,237 @@
+{
+	"name": "omp-vscode-bridge",
+	"displayName": "OMP VS Code Bridge",
+	"publisher": "zandev32",
+	"icon": "images/icon.png",
+	"description": "Silently shows OMP agent file edits in VS Code without stealing focus",
+	"version": "0.6.0",
+	"private": true,
+	"license": "MIT",
+	"engines": {
+		"vscode": "^1.146.0"
+	},
+	"categories": [
+		"Other"
+	],
+	"main": "./dist/client/extension.js",
+	"activationEvents": [
+		"onStartupFinished"
+	],
+	"omp": {
+		"extensions": [
+			"./src/omp/index.ts"
+		]
+	},
+	"contributes": {
+		"commands": [
+			{
+				"command": "ompBridge.showLogFile",
+				"title": "OMP Bridge: Show Log File",
+				"category": "OMP Bridge"
+			},
+			{
+				"command": "ompBridge.showSessions",
+				"title": "OMP Bridge: Show Sessions",
+				"category": "OMP Bridge"
+			},
+			{
+				"command": "ompBridge.revertEdit",
+				"title": "OMP Bridge: Revert Edit",
+				"category": "OMP Bridge"
+			},
+			{
+				"command": "ompBridge.sendSelection",
+				"title": "OMP Bridge: Send Selection to Agent",
+				"category": "OMP Bridge"
+			},
+			{
+				"command": "ompBridge.sendFile",
+				"title": "OMP Bridge: Send File to Agent",
+				"category": "OMP Bridge"
+			},
+			{
+				"command": "ompBridge.sendProblems",
+				"title": "OMP Bridge: Send Problems to Agent",
+				"category": "OMP Bridge"
+			},
+			{
+				"command": "ompBridge.revealHistory",
+				"title": "OMP Bridge: Show Recent Edits",
+				"category": "OMP Bridge"
+			},
+			{
+				"command": "ompBridge.sendDiff",
+				"title": "OMP Bridge: Send Git Diff",
+				"category": "OMP Bridge"
+			},
+			{
+				"command": "ompBridge.sendSymbol",
+				"title": "OMP Bridge: Send Symbol at Cursor",
+				"category": "OMP Bridge"
+			},
+			{
+				"command": "ompBridge.sendOpenTabs",
+				"title": "OMP Bridge: Send Open Tabs",
+				"category": "OMP Bridge"
+			},
+			{
+				"command": "ompBridge.addFiles",
+				"title": "OMP Bridge: Add Files to Prompt",
+				"category": "OMP Bridge"
+			},
+			{
+				"command": "ompBridge.pinSession",
+				"title": "OMP Bridge: Pin Window to Session",
+				"category": "OMP Bridge"
+			},
+			{
+				"command": "ompBridge.unpinSession",
+				"title": "OMP Bridge: Unpin Session",
+				"category": "OMP Bridge"
+			},
+			{
+				"command": "ompBridge.forgetApprovals",
+				"title": "OMP Bridge: Forget Saved Approvals",
+				"category": "OMP Bridge"
+			}
+		],
+		"keybindings": [
+			{
+				"command": "ompBridge.sendSelection",
+				"key": "ctrl+alt+k",
+				"mac": "cmd+alt+k",
+				"when": "editorTextFocus"
+			},
+			{
+				"command": "ompBridge.sendFile",
+				"key": "ctrl+alt+shift+k",
+				"mac": "cmd+alt+shift+k"
+			},
+			{
+				"command": "ompBridge.sendProblems",
+				"key": "ctrl+alt+shift+p",
+				"mac": "cmd+alt+shift+p"
+			},
+			{
+				"command": "ompBridge.sendDiff",
+				"key": "ctrl+alt+g",
+				"mac": "cmd+alt+g"
+			},
+			{
+				"command": "ompBridge.sendSymbol",
+				"key": "ctrl+alt+y",
+				"mac": "cmd+alt+y"
+			}
+		],
+		"configuration": {
+			"title": "OMP Bridge",
+			"properties": {
+				"ompBridge.autoOpen": {
+					"type": "boolean",
+					"default": true,
+					"description": "Open or diff files as the agent edits them. Disable to only record them in Recent edits."
+				},
+				"ompBridge.showDiffs": {
+					"type": "boolean",
+					"default": true,
+					"description": "Preview proposed write content before answering an approval request."
+				},
+				"ompBridge.requireApproval": {
+					"type": "boolean",
+					"default": true,
+					"description": "Ask in VS Code before the agent writes or edits a file. Deny returns an error to the agent."
+				},
+				"ompBridge.ignoredPaths": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					},
+					"default": [
+						"**/node_modules/**",
+						"**/.git/**"
+					],
+					"description": "Glob patterns of file paths the bridge should ignore."
+				},
+				"ompBridge.allowedCommands": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					},
+					"default": [],
+					"description": "VS Code command ids the agent may run via the vscode_command tool. Empty means none."
+				},
+				"ompBridge.confirmCommands": {
+					"type": "boolean",
+					"default": true,
+					"description": "Ask for confirmation each time the agent runs an allowlisted command."
+				},
+				"ompBridge.shareContext": {
+					"type": "boolean",
+					"default": true,
+					"description": "Send a compact editor snapshot (active file, selection, diagnostics) with every agent turn."
+				},
+				"ompBridge.includeDiagnostics": {
+					"type": "boolean",
+					"default": true,
+					"description": "Include diagnostics counts and messages in the per-turn snapshot."
+				},
+				"ompBridge.diffScope": {
+					"type": "string",
+					"enum": [
+						"unstaged",
+						"staged",
+						"head"
+					],
+					"default": "unstaged",
+					"description": "Which git diff the Send Git Diff command sends."
+				},
+				"ompBridge.contextDelivery": {
+					"type": "string",
+					"enum": [
+						"aside",
+						"queue"
+					],
+					"default": "aside",
+					"description": "aside injects context into the running turn; queue stores it for the next turn without starting one."
+				}
+			}
+		},
+		"viewsContainers": {
+			"activitybar": [
+				{
+					"id": "ompBridge",
+					"title": "OMP Bridge",
+					"icon": "images/icon.png"
+				}
+			]
+		},
+		"views": {
+			"ompBridge": [
+				{
+					"id": "ompBridge.recentEdits",
+					"name": "Recent edits"
+				}
+			]
+		},
+		"menus": {
+			"view/item/context": [
+				{
+					"command": "ompBridge.revertEdit",
+					"when": "view == ompBridge.recentEdits",
+					"group": "inline"
+				}
+			]
+		}
+	},
+	"scripts": {
+		"build": "bunx tsc -p tsconfig.json",
+		"typecheck": "bunx tsc -p tsconfig.check.json",
+		"package": "bun run build && npx --yes @vscode/vsce package --no-dependencies"
+	},
+	"devDependencies": {
+		"@oh-my-pi/pi-coding-agent": "^18.20.0",
+		"@types/node": "^26.6.6",
+		"@types/vscode": "^1.146.0",
+		"typescript": "^7.0.2"
+	}
+}

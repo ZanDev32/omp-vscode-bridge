@@ -64,6 +64,35 @@ bytes, `xd://` writes ignored, per-turn snapshot injected, command allowlist ref
 - Socket state: `ss -tnp | grep <port>` should show a `code` ↔ `omp` pair.
 - Endpoint records: `ls ~/.omp-vscode/servers/` should contain exactly the live processes.
 
+## Releasing to Open VSX
+
+Publishing uses **trusted publishing** — no token is stored in the repository. The workflow
+`.github/workflows/publish-openvsx.yml` requests a GitHub OIDC ID token and `ovsx` exchanges it
+for a short-lived credential scoped to this one extension.
+
+One-time setup, on <https://open-vsx.org>:
+
+1. Sign in with GitHub and claim the `zandev32` namespace (it must match the manifest
+   `publisher`).
+2. Open **Publishers → zandev32 → Trusted Publishers** and register:
+   repository `ZanDev32/omp-vscode-bridge`, workflow `publish-openvsx.yml`, no environment.
+   If you do pin an environment, add `environment: <name>` to the job to match.
+3. Nothing else — no PAT, no repository secret.
+
+Release:
+
+```bash
+# bump "version" in package.json, commit, then
+git tag v0.7.0
+git push origin master --tags
+```
+
+The tag must equal `v<package.json version>`; the workflow fails otherwise. Manual runs accept
+a `dry_run` input that builds and checks without publishing.
+
+CI (`.github/workflows/ci.yml`) runs typecheck, build, and package on every push to `master`
+and on pull requests, and uploads the vsix as an artifact.
+
 ## Release checklist
 
 1. `bun run typecheck && bun run package`

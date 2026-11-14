@@ -6,11 +6,19 @@
 
 <p align="center">[English](README.md) | 简体中文</p>
 
+<p align="center">
+  <a href="https://open-vsx.org/extension/zandev32/omp-vscode-bridge"><img alt="Open VSX" src="https://img.shields.io/open-vsx/v/zandev32/omp-vscode-bridge?label=Open%20VSX"></a>
+  <img alt="Downloads" src="https://img.shields.io/open-vsx/dt/zandev32/omp-vscode-bridge">
+  <a href="https://github.com/ZanDev32/omp-vscode-bridge/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/ZanDev32/omp-vscode-bridge/actions/workflows/ci.yml/badge.svg"></a>
+</p>
+
 智能体的改动直接出现在编辑器里，不抢走焦点：已跟踪文件以 diff 打开，未跟踪文件静默打开，每次写入都可审批、可回滚、也可完全不打开。智能体仍在终端里工作，VS Code 成为审阅界面。
 
 一个包、两个 TypeScript 半边：VS Code 扩展（`src/client/`）与 OMP 插件（`src/omp/`），通过回环协议（`src/protocol.ts`）通信。
 
-## 快速开始
+## 安装
+
+可从 [Open VSX](https://open-vsx.org/extension/zandev32/omp-vscode-bridge) 安装（`zandev32.omp-vscode-bridge`），或本地构建：
 
 ```bash
 bun install

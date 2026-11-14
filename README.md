@@ -6,6 +6,12 @@
 
 <p align="center">[English](README.md) | [简体中文](README.zh-CN.md)</p>
 
+<p align="center">
+  <a href="https://open-vsx.org/extension/zandev32/omp-vscode-bridge"><img alt="Open VSX" src="https://img.shields.io/open-vsx/v/zandev32/omp-vscode-bridge?label=Open%20VSX"></a>
+  <img alt="Downloads" src="https://img.shields.io/open-vsx/dt/zandev32/omp-vscode-bridge">
+  <a href="https://github.com/ZanDev32/omp-vscode-bridge/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/ZanDev32/omp-vscode-bridge/actions/workflows/ci.yml/badge.svg"></a>
+</p>
+
 Agent edits land in your editor without stealing focus: tracked files open as diffs, untracked
 ones open quietly, and every write can be approved, reverted, or left alone. The agent keeps
 working in its terminal; VS Code becomes the review surface.
@@ -13,7 +19,10 @@ working in its terminal; VS Code becomes the review surface.
 One package, two TypeScript halves: a VS Code extension (`src/client/`) and an OMP plugin
 (`src/omp/`) that speak a loopback protocol (`src/protocol.ts`).
 
-## Quick start
+## Install
+
+From [Open VSX](https://open-vsx.org/extension/zandev32/omp-vscode-bridge) as
+`zandev32.omp-vscode-bridge`, or build locally:
 
 ```bash
 bun install

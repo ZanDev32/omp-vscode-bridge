@@ -52,6 +52,10 @@ omp plugin link .              # agent half
   call is confirmed. Never ship a broader default.
 - **Snapshots are bounded.** Pre-edit text ≤ 1 MB and never binary (NUL check); skipped
   snapshots must degrade to "no snapshot for this edit", not to writing garbage.
+- **Publisher is `zandev32`.** The extension is published to Open VSX through
+  `.github/workflows/publish-openvsx.yml` using trusted publishing (GitHub OIDC). Never add an
+  `OVSX_PAT` secret or a PAT-based publish step; the registry registration names the workflow.
+  Release by tagging `v<version>`; the tag must match `package.json`.
 - **No content in logs.** The output channel and `pi.logger` lines name paths and counts,
   never file bodies or tokens.
 

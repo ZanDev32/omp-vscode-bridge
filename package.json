@@ -4,6 +4,10 @@
 	"publisher": "zandev32",
 	"icon": "images/icon.png",
 	"description": "Silently shows OMP agent file edits in VS Code without stealing focus",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/ZanDev32/omp-vscode-bridge.git"
+	},
 	"version": "0.6.0",
 	"private": true,
 	"license": "MIT",

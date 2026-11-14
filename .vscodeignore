@@ -4,6 +4,8 @@
 bun.lock
 node_modules/**
 src/**
+docs/**
+AGENTS.md
 tsconfig.json
 **/*.map
 *.vsix

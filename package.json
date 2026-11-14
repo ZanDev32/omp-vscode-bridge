@@ -15,7 +15,23 @@
 		"vscode": "^1.146.0"
 	},
 	"categories": [
+		"AI",
+		"Chat",
 		"Other"
+	],
+	"keywords": [
+		"omp",
+		"oh-my-pi",
+		"ai",
+		"agent",
+		"coding-agent",
+		"mcp",
+		"llm",
+		"diff",
+		"code-review",
+		"approval",
+		"terminal",
+		"productivity"
 	],
 	"main": "./dist/client/extension.js",
 	"activationEvents": [
